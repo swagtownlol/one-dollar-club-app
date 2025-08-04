@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { loadStripe } from '@stripe/stripe-js';
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
-const API_BASE_URL = import.meta.env.VITE_API_URL;
+const API_BASE_URL = '/api';
 
 const tierInfo = {
   '4.20': {
@@ -41,9 +41,15 @@ function TierPage() {
   };
 
   const handlePayment = async () => {
-    const stripe = await stripePromise;
-
     try {
+      console.log('Starting payment process for amount:', amount);
+      const stripe = await stripePromise;
+      if (!stripe) {
+        console.error('Stripe failed to load');
+        return;
+      }
+
+      console.log('Creating checkout session...');
       const response = await fetch(`${API_BASE_URL}/create-checkout-session`, {
         method: 'POST',
         headers: {
