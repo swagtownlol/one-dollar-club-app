@@ -1,14 +1,21 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+import express from 'express';
+import bodyParser from 'body-parser';
+import cors from 'cors';
+import Stripe from 'stripe';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import path from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const SUCCESS_URL = process.env.NODE_ENV === 'production' 
   ? 'https://onedollarclub.org?success=true'
   : 'http://localhost:3000?success=true';
 const CANCEL_URL = process.env.NODE_ENV === 'production'
   ? 'https://onedollarclub.org?canceled=true'
   : 'http://localhost:3000?canceled=true';
-const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 5001; // Updated port to 5001
@@ -68,15 +75,6 @@ app.post('/create-checkout-session', async (req, res) => {
       mode: 'payment',
       success_url: SUCCESS_URL,
       cancel_url: CANCEL_URL,
-            },
-            unit_amount: amount * 100, // Convert to cents
-          },
-          quantity: 1,
-        },
-      ],
-      mode: 'payment',
-      success_url: 'http://localhost:5001/success',
-      cancel_url: 'http://localhost:5001/cancel',
     });
 
     res.json({ id: session.id });
