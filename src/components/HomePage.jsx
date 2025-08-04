@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { loadStripe } from '@stripe/stripe-js';
 
-const stripePromise = loadStripe('your-publishable-key-here');
-const API_BASE_URL = 'http://localhost:5001';
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 const PAYMENT_TIERS = [
   { amount: 1, label: '$1' },
