@@ -3,7 +3,7 @@
   "framework": "vite",
   "functions": {
     "api/**/*.js": {
-      "runtime": "nodejs18"
+      "runtime": "@vercel/node@2.15.3"
     }
   },
   "routes": [
