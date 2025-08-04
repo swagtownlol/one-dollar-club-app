@@ -1,6 +1,10 @@
 import Stripe from 'stripe';
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
+const DOMAIN = process.env.NODE_ENV === 'production' 
+  ? 'https://onedollarclub.org' 
+  : 'http://localhost:3000';
+
 // In-memory counter (Note: This will reset on each deployment)
 let paymentCount = 0;
 
@@ -28,8 +32,8 @@ module.exports = async (req, res) => {
         },
       ],
       mode: 'payment',
-      success_url: `${process.env.URL || 'http://localhost:3000'}?success=true`,
-      cancel_url: `${process.env.URL || 'http://localhost:3000'}?canceled=true`,
+      success_url: `${DOMAIN}?success=true`,
+      cancel_url: `${DOMAIN}?canceled=true`,
     });
 
     if (amount === 1) {
