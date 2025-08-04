@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const stripe = require('stripe')('your-secret-key-here');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const SUCCESS_URL = process.env.NODE_ENV === 'production' 
   ? 'https://onedollarclub.org?success=true'
   : 'http://localhost:3000?success=true';

@@ -33,24 +33,46 @@ function HomePage() {
   }, []);
 
   const handlePayment = async (amount = 1) => {
-    const stripe = await stripePromise;
+    try {
+      console.log('Starting payment process for amount:', amount);
+      const stripe = await stripePromise;
+      if (!stripe) {
+        console.error('Stripe failed to load');
+        return;
+      }
 
-    // Call backend to create a checkout session
-    const response = await fetch(`${API_BASE_URL}/create-checkout-session`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ amount }),
-    });
+      console.log('Creating checkout session...');
+      const response = await fetch(`${API_BASE_URL}/create-checkout-session`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ amount }),
+      });
 
-    const session = await response.json();
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Server response error:', response.status, errorText);
+        return;
+      }
 
-    // Redirect to Stripe Checkout
-    const result = await stripe.redirectToCheckout({ sessionId: session.id });
+      const session = await response.json();
+      console.log('Checkout session created:', session);
 
-    if (result.error) {
-      console.error(result.error.message);
+      if (!session.id) {
+        console.error('No session ID received from server');
+        return;
+      }
+
+      // Redirect to Stripe Checkout
+      console.log('Redirecting to Stripe checkout...');
+      const result = await stripe.redirectToCheckout({ sessionId: session.id });
+
+      if (result.error) {
+        console.error('Stripe redirect error:', result.error.message);
+      }
+    } catch (error) {
+      console.error('Payment process error:', error);
     }
   };
 
