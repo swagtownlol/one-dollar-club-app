@@ -1,11 +1,6 @@
-import Stripe from \"stripe\";
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+const stripe = require(\"stripe\")(process.env.STRIPE_SECRET_KEY);
 
-const DOMAIN = process.env.NODE_ENV === \"production\" 
-  ? \"https://onedollarclub.org\" 
-  : \"http://localhost:3000\";
-
-export default async function handler(req, res) {
+module.exports = async (req, res) => {
   if (req.method !== \"POST\") {
     return res.status(405).json({ error: \"Method not allowed\" });
   }
@@ -17,8 +12,6 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: \"Amount is required\" });
     }
 
-    console.log(\"Creating checkout session for amount:\", amount);
-    
     const session = await stripe.checkout.sessions.create({
       payment_method_types: [\"card\"],
       line_items: [
@@ -35,14 +28,17 @@ export default async function handler(req, res) {
         },
       ],
       mode: \"payment\",
-      success_url: `${DOMAIN}?success=true`,
-      cancel_url: `${DOMAIN}?canceled=true`
+      success_url: process.env.NODE_ENV === \"production\"
+        ? \"https://onedollarclub.org?success=true\"
+        : \"http://localhost:3000?success=true\",
+      cancel_url: process.env.NODE_ENV === \"production\"
+        ? \"https://onedollarclub.org?canceled=true\"
+        : \"http://localhost:3000?canceled=true\"
     });
 
-    console.log(\"Checkout session created:\", session.id);
-    res.status(200).json({ id: session.id });
+    return res.status(200).json({ id: session.id });
   } catch (error) {
     console.error(\"Error creating checkout session:\", error);
-    res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: error.message });
   }
-}
+};
