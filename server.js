@@ -2,8 +2,12 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const stripe = require('stripe')('your-secret-key-here');
-const SUCCESS_URL = 'http://localhost:3000?success=true';
-const CANCEL_URL = 'http://localhost:3000?canceled=true';
+const SUCCESS_URL = process.env.NODE_ENV === 'production' 
+  ? 'https://onedollarclub.org?success=true'
+  : 'http://localhost:3000?success=true';
+const CANCEL_URL = process.env.NODE_ENV === 'production'
+  ? 'https://onedollarclub.org?canceled=true'
+  : 'http://localhost:3000?canceled=true';
 const path = require('path');
 
 const app = express();
