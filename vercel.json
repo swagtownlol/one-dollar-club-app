@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "framework": "vite",
   "builds": [
     {
       "src": "dist/**",
@@ -20,19 +21,4 @@
       "dest": "/dist/$1"
     }
   ]
-},
-  "framework": "vite",
-  "functions": {
-    "api/**/*.js": {
-      "runtime": "@vercel/node@2.15.3"
-    }
-  },
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
-    }
-  ],
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist"
 }
