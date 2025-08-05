@@ -24,19 +24,49 @@ const PORT = process.env.PORT || 5001; // Updated port to 5001
 app.use(cors());
 app.use(bodyParser.json());
 
-// Serve static files from the React app
-app.use(express.static(path.join(__dirname, 'dist')));
+// API Routes
+app.post('/api/create-checkout-session', async (req, res) => {
+  try {
+    const { amount } = req.body;
+    
+    if (!amount) {
+      return res.status(400).json({ error: 'Amount is required' });
+    }
 
-// Catch-all handler to serve the React app for any unknown routes
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+    console.log('Creating checkout session for amount:', amount);
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: `$${amount} Club Membership`,
+              description: 'One-time payment to join the club'
+            },
+            unit_amount: Math.round(amount * 100),
+          },
+          quantity: 1,
+        },
+      ],
+      mode: 'payment',
+      success_url: SUCCESS_URL,
+      cancel_url: CANCEL_URL,
+    });
+
+    console.log('Checkout session created:', session.id);
+    res.status(200).json({ id: session.id });
+  } catch (error) {
+    console.error('Error creating checkout session:', error);
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // In-memory storage for payment count
 let paymentCount = 0;
 
 // Route to handle payment count
-app.post('/payment', (req, res) => {
+app.post('/api/payment', (req, res) => {
   paymentCount += 1;
   res.json({ count: paymentCount });
 });

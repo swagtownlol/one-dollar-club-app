@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "framework": "vite",
   "builds": [
     {
       "src": "server.js",
@@ -17,6 +16,15 @@
   "routes": [
     {
       "src": "/api/(.*)",
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
+        "Access-Control-Allow-Headers": "Content-Type"
+      },
+      "continue": true
+    },
+    {
+      "src": "/api/(.*)",
       "dest": "/server.js"
     },
     {
@@ -24,7 +32,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/"
+      "dest": "/index.html"
     }
   ]
 }
