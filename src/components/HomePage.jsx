@@ -18,19 +18,37 @@ const PAYMENT_TIERS = [
 
 function HomePage() {
   const navigate = useNavigate();
-  const [paymentCount, setPaymentCount] = useState(null);
+  const [tierCounts, setTierCounts] = useState({});
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Fetch tier counts on component mount
+    fetchTierCounts();
+    
     // Check for payment success from URL params
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('success') === 'true') {
-      fetchPaymentCount();
       setShowEmailForm(true);
+      // Refresh counts after successful payment
+      fetchTierCounts();
     }
   }, []);
+
+  const fetchTierCounts = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch(`${API_BASE_URL}/payment-counts`);
+      const counts = await response.json();
+      setTierCounts(counts);
+    } catch (error) {
+      console.error('Error fetching tier counts:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handlePayment = async (amount = 1) => {
     try {
@@ -168,17 +186,59 @@ function HomePage() {
       {message && <p style={{ margin: '20px 0', color: '#4CAF50' }}>{message}</p>}
 
       <div style={{ marginTop: '40px' }}>
-        <h3>Other Payment Tiers</h3>
-        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '10px' }}>
-          {PAYMENT_TIERS.slice(1).map(({ amount, label }) => (
-            <button
+        <h3>Join the Club - Choose Your Tier</h3>
+        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '20px', marginTop: '20px' }}>
+          {PAYMENT_TIERS.map(({ amount, label }) => (
+            <div 
               key={amount}
-              onClick={() => navigate(`/tier/${amount}`)}
               style={{
-                padding: '10px 20px',
-                margin: '5px',
-                backgroundColor: '#2196F3',
-                color: 'white',
+                border: '1px solid #ddd',
+                borderRadius: '8px',
+                padding: '20px',
+                width: '200px',
+                backgroundColor: '#fff',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+              }}
+            >
+              <h4 style={{ marginTop: 0, color: '#333' }}>{label} Tier</h4>
+              <p style={{ color: '#666', minHeight: '40px' }}>
+                {isLoading ? 'Loading...' : `${tierCounts[amount] || 0} members`}
+              </p>
+              <button
+                onClick={() => handlePayment(amount)}
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  backgroundColor: '#4CAF50',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.3s'
+                }}
+                onMouseOver={(e) => e.target.style.backgroundColor = '#45a049'}
+                onMouseOut={(e) => e.target.style.backgroundColor = '#4CAF50'}
+              >
+                Join with {label}
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {message && (
+        <div 
+          style={{ 
+            margin: '20px 0',
+            padding: '10px',
+            backgroundColor: '#4CAF50',
+            color: 'white',
+            borderRadius: '4px'
+          }}
+        >
+          {message}
+        </div>
+      )}
                 border: 'none',
                 borderRadius: '5px',
                 cursor: 'pointer',
